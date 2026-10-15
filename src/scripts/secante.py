@@ -30,4 +30,4 @@ def secante(funcion, valor_inicial, segundo_valor, tolerancia, maximo_iteracione
         valor_anterior = valor_actual
         valor_actual = siguiente_valor
 
-    return valor_actual, maximo_iteraciones, errores
+    return None, maximo_iteraciones, errores
