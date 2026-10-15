@@ -26,4 +26,4 @@ def newton_raphson(funcion, derivada, valor_inicial, tolerancia, maximo_iteracio
 
         valor_actual = siguiente_valor
 
-    return valor_actual, maximo_iteraciones, errores
+    return None, maximo_iteraciones, errores
