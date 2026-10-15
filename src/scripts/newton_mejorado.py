@@ -1,34 +1,51 @@
 
-def newton_mejorado(funcion, derivada, segunda_derivada, valor_inicial, tolerancia, maximo_iteraciones):
+import math
 
+
+def newton_mejorado(funcion, derivada, segunda_derivada, valor_inicial, tolerancia, maximo_iteraciones):
     valor_actual = valor_inicial
     errores = []
 
     for iteracion in range(1, maximo_iteraciones + 1):
+        try:
+            resultado = funcion(valor_actual)
 
-        resultado = funcion(valor_actual)
-        resultado_derivada = derivada(valor_actual)
-        resultado_segunda_derivada = segunda_derivada(valor_actual)
+            if not math.isfinite(resultado):
+                return None, iteracion, errores
 
-        numerador = resultado * resultado_derivada
+            if abs(resultado) < tolerancia:
+                return valor_actual, iteracion - 1, errores
 
-        denominador = resultado_derivada**2 - resultado * resultado_segunda_derivada
+            resultado_derivada = derivada(valor_actual)
+            resultado_segunda_derivada = segunda_derivada(valor_actual)
 
-        if denominador == 0:
-            print("No se puede dividir por cero")
+            numerador = resultado * resultado_derivada
+            denominador = resultado_derivada**2 - resultado * resultado_segunda_derivada
+
+            if not math.isfinite(numerador) or not math.isfinite(denominador):
+                return None, iteracion, errores
+
+            if denominador == 0:
+                print("No se puede dividir por cero")
+                return None, iteracion, errores
+
+            siguiente_valor = valor_actual - numerador / denominador
+
+            if not math.isfinite(siguiente_valor):
+                return None, iteracion, errores
+
+            error = abs(siguiente_valor - valor_actual)
+            errores.append(error)
+
+            if abs(funcion(siguiente_valor)) < tolerancia:
+                return siguiente_valor, iteracion, errores
+
+            if error < tolerancia:
+                return siguiente_valor, iteracion, errores
+
+            valor_actual = siguiente_valor
+
+        except (ValueError, OverflowError, ZeroDivisionError, TypeError):
             return None, iteracion, errores
 
-        siguiente_valor = valor_actual - numerador / denominador
-
-        error = abs(siguiente_valor - valor_actual)
-        errores.append(error)
-
-        if abs(funcion(siguiente_valor)) < tolerancia:
-            return siguiente_valor, iteracion, errores
-
-        if error < tolerancia:
-            return siguiente_valor, iteracion, errores
-
-        valor_actual = siguiente_valor
-
-    return valor_actual, maximo_iteraciones, errores
+    return None, maximo_iteraciones, errores
