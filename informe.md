@@ -100,7 +100,7 @@ Newton mejorado encontro la raiz exacta 2.0 en una sola iteracion.
 
 Esto demuestra que una funcion puede tener una raiz sin cambiar de signo y que Newton mejorado puede ser especialmente eficiente con raices multiples.
 
-Tambien se observo que un valor de la funcion cercano a cero no siempre significa que la aproximacion este igualmente cerca de la raiz exacta.
+En la función con raíz doble se observó que un residuo pequeño no garantiza que la aproximación esté igual de cerca de la raíz exacta. Newton-Raphson obtuvo aproximadamente 1.99921875 después de 10 iteraciones. Aunque el valor absoluto de la función fue cercano a 6.10 × 10⁻⁷, la distancia a la raíz exacta x = 2 fue aproximadamente 7.81 × 10⁻⁴. Esto ocurre porque, para f(x) = (x − 2)², el residuo es el cuadrado de la distancia a la raíz. En cambio, Newton-Raphson mejorado alcanzó x = 2 en una iteración, con residuo cero.
 
 ### 4.5. ¿Como influyen el intervalo inicial y la estimacion inicial?
 
