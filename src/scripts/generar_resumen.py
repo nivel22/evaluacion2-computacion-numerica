@@ -106,7 +106,7 @@ with open("src/data/resumen_convergencia.csv", "w", newline="") as archivo:
             )
 
             if raiz is not None:
-                error = errores[-1]
+                error = errores[-1] if errores else ""
                 valor_funcion = abs(funcion(raiz))
 
                 if error < tolerancia or valor_funcion < tolerancia:
