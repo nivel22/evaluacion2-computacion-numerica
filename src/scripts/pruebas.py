@@ -83,14 +83,21 @@ print("Metodo de punto fijo")
 print("Valor inicial:", valor_inicial)
 print("Aproximacion:", raiz)
 print("Iteraciones:", iteraciones)
-print("Valor de la funcion:", polinomica_doble(raiz))
-print("Error final:", errores[-1])
-print("Distancia a la raiz:", abs(raiz - raiz_exacta))
 
-if errores[-1] < tolerancia:
-    print("Cumplio el criterio de parada")
+if raiz is not None:
+    print("Valor de la funcion:", polinomica_doble(raiz))
+    print("Distancia a la raiz:", abs(raiz - raiz_exacta))
 else:
-    print("Llego al maximo de iteraciones")
+    print("No se encontro una aproximacion valida")
+
+if errores:
+    print("Error final:", errores[-1])
+    if raiz is not None and errores[-1] < tolerancia:
+        print("Cumplio el criterio de parada")
+    else:
+        print("No se alcanzo la tolerancia")
+else:
+    print("No se registraron errores")
 
 
 raiz, iteraciones, errores = secante(
@@ -110,7 +117,7 @@ if raiz is not None:
     print("Aproximacion:", raiz)
     print("Iteraciones:", iteraciones)
     print("Valor de la funcion:", polinomica_doble(raiz))
-    print("Error final:", errores[-1])
+    print("Error final:", errores[-1] if errores else "No disponible")
     print("Distancia a la raiz:", abs(raiz - raiz_exacta))
 else:
     print("No se encontro la raiz")
@@ -132,7 +139,7 @@ if raiz is not None:
     print("Aproximacion:", raiz)
     print("Iteraciones:", iteraciones)
     print("Valor de la funcion:", polinomica_doble(raiz))
-    print("Error final:", errores[-1])
+    print("Error final:", errores[-1] if errores else "No disponible")
     print("Distancia a la raiz:", abs(raiz - raiz_exacta))
 else:
     print("No se encontro la raiz")
@@ -155,7 +162,7 @@ if raiz is not None:
     print("Aproximacion:", raiz)
     print("Iteraciones:", iteraciones)
     print("Valor de la funcion:", polinomica_doble(raiz))
-    print("Error final:", errores[-1])
+    print("Error final:", errores[-1] if errores else "No disponible")
     print("Distancia a la raiz:", abs(raiz - raiz_exacta))
 else:
     print("No se encontro la raiz")
