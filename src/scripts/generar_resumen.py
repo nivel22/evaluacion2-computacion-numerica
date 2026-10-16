@@ -1,5 +1,6 @@
 
 import csv
+import math
 
 from funciones import *
 from biseccion import biseccion
@@ -65,28 +66,38 @@ valores_iniciales = [1.5, 1.2, 2.5, 0.5, 0.5, 0.5]
 segundos_valores = [2, 2.5, 3, 1, 1, 1]
 
 
-with open("src/data/resumen_convergencia.csv", "w", newline="") as archivo:
+def preparar_resultado(funcion, raiz, errores):
+    error = errores[-1] if errores else ""
 
+    if raiz is None:
+        return "", error, "", "No convergio"
+
+    try:
+        valor_funcion = abs(funcion(raiz))
+        if not math.isfinite(valor_funcion):
+            return raiz, error, "", "No convergio"
+    except (ValueError, OverflowError, ZeroDivisionError, TypeError):
+        return raiz, error, "", "No convergio"
+
+    cumple_error = error != "" and error < tolerancia
+    cumple_residuo = valor_funcion < tolerancia
+    estado = "Convergencia" if cumple_error or cumple_residuo else "No convergio"
+    return raiz, error, valor_funcion, estado
+
+
+with open("src/data/resumen_convergencia.csv", "w", newline="", encoding="utf-8") as archivo:
     escribir = csv.writer(archivo)
-
     escribir.writerow([
-        "Funcion",
-        "Metodo",
-        "Iteraciones",
-        "Raiz",
-        "Error",
-        "Valor_funcion",
-        "Estado"
+        "Funcion", "Metodo", "Iteraciones", "Raiz",
+        "Error", "Valor_funcion", "Estado"
     ])
 
-    for numero in range(6):
-
+    for numero in range(len(nombres)):
         nombre = nombres[numero]
         funcion = funciones[numero]
         derivada = derivadas[numero]
         segunda_derivada = segundas_derivadas[numero]
         funcion_punto_fijo = funciones_punto_fijo[numero]
-
         limite_inferior = limites_inferiores[numero]
         limite_superior = limites_superiores[numero]
         valor_inicial = valores_iniciales[numero]
@@ -95,172 +106,73 @@ with open("src/data/resumen_convergencia.csv", "w", newline="") as archivo:
         print()
         print("Funcion:", nombre)
 
-        if funcion(limite_inferior) * funcion(limite_superior) < 0:
+        valor_inferior = funcion(limite_inferior)
+        valor_superior = funcion(limite_superior)
+        tiene_raiz_extremo = (
+            abs(valor_inferior) < tolerancia
+            or abs(valor_superior) < tolerancia
+        )
+        tiene_cambio_signo = valor_inferior * valor_superior < 0
 
+        if tiene_raiz_extremo or tiene_cambio_signo:
             raiz, iteraciones, errores = biseccion(
-                funcion,
-                limite_inferior,
-                limite_superior,
-                tolerancia,
-                maximo_iteraciones
+                funcion, limite_inferior, limite_superior,
+                tolerancia, maximo_iteraciones
             )
-
-            if raiz is not None:
-                error = errores[-1]
-                valor_funcion = abs(funcion(raiz))
-
-                if error < tolerancia or valor_funcion < tolerancia:
-                    estado = "Convergencia"
-                else:
-                    estado = "No convergio"
-            else:
-                error = ""
-                valor_funcion = ""
-                estado = "No convergio"
-
             escribir.writerow([
-                nombre, "Biseccion", iteraciones, raiz,
-                error, valor_funcion, estado
+                nombre, "Biseccion", iteraciones,
+                *preparar_resultado(funcion, raiz, errores)
             ])
 
             raiz, iteraciones, errores = falsa_posicion(
-                funcion,
-                limite_inferior,
-                limite_superior,
-                tolerancia,
-                maximo_iteraciones
+                funcion, limite_inferior, limite_superior,
+                tolerancia, maximo_iteraciones
             )
-
-            if raiz is not None:
-                error = errores[-1] if errores else ""
-                valor_funcion = abs(funcion(raiz))
-
-                if error != "" and (error < tolerancia or valor_funcion < tolerancia):
-                    estado = "Convergencia"
-                else:
-                    estado = "No convergio"
-            else:
-                error = ""
-                valor_funcion = ""
-                estado = "No convergio"
-
             escribir.writerow([
-                nombre, "Falsa posicion", iteraciones, raiz,
-                error, valor_funcion, estado
+                nombre, "Falsa posicion", iteraciones,
+                *preparar_resultado(funcion, raiz, errores)
             ])
-
         else:
-
-            escribir.writerow([
-                nombre, "Biseccion", 0, "", "", "", "No aplica"
-            ])
-
-            escribir.writerow([
-                nombre, "Falsa posicion", 0, "", "", "", "No aplica"
-            ])
+            escribir.writerow([nombre, "Biseccion", 0, "", "", "", "No aplica"])
+            escribir.writerow([nombre, "Falsa posicion", 0, "", "", "", "No aplica"])
 
         raiz, iteraciones, errores = punto_fijo(
-            funcion_punto_fijo,
-            valor_inicial,
-            tolerancia,
-            maximo_iteraciones
+            funcion_punto_fijo, valor_inicial,
+            tolerancia, maximo_iteraciones
         )
-
-        if raiz is not None:
-            error = errores[-1]
-            valor_funcion = abs(funcion(raiz))
-            estado = "Convergencia"
-        else:
-            error = errores[-1] if errores else ""
-            valor_funcion = ""
+        raiz_csv, error, valor_funcion, estado = preparar_resultado(
+            funcion, raiz, errores
+        )
+        if raiz is not None and valor_funcion != "" and valor_funcion >= tolerancia:
             estado = "No convergio"
-
         escribir.writerow([
-            nombre, "Punto fijo", iteraciones, raiz,
-            error, valor_funcion, estado
+            nombre, "Punto fijo", iteraciones,
+            raiz_csv, error, valor_funcion, estado
         ])
 
-        raiz, iteraciones, errores = secante(
-            funcion,
-            valor_inicial,
-            segundo_valor,
-            tolerancia,
-            maximo_iteraciones
-        )
+        metodos = [
+            ("Secante", secante, (
+                funcion, valor_inicial, segundo_valor,
+                tolerancia, maximo_iteraciones
+            )),
+            ("Newton-Raphson", newton_raphson, (
+                funcion, derivada, valor_inicial,
+                tolerancia, maximo_iteraciones
+            )),
+            ("Newton mejorado", newton_mejorado, (
+                funcion, derivada, segunda_derivada,
+                valor_inicial, tolerancia, maximo_iteraciones
+            ))
+        ]
 
-        if raiz is not None:
-            error = errores[-1] if errores else ""
-            valor_funcion = abs(funcion(raiz))
-
-            if error != "" and (error < tolerancia or valor_funcion < tolerancia):
-                estado = "Convergencia"
-            else:
-                estado = "No convergio"
-        else:
-            error = ""
-            valor_funcion = ""
-            estado = "No convergio"
-
-        escribir.writerow([
-            nombre, "Secante", iteraciones, raiz,
-            error, valor_funcion, estado
-        ])
-
-        raiz, iteraciones, errores = newton_raphson(
-            funcion,
-            derivada,
-            valor_inicial,
-            tolerancia,
-            maximo_iteraciones
-        )
-
-        if raiz is not None:
-            error = errores[-1] if errores else ""
-            valor_funcion = abs(funcion(raiz))
-
-            if error != "" and (error < tolerancia or valor_funcion < tolerancia):
-                estado = "Convergencia"
-            else:
-                estado = "No convergio"
-        else:
-            error = ""
-            valor_funcion = ""
-            estado = "No convergio"
-
-        escribir.writerow([
-            nombre, "Newton-Raphson", iteraciones, raiz,
-            error, valor_funcion, estado
-        ])
-
-        raiz, iteraciones, errores = newton_mejorado(
-            funcion,
-            derivada,
-            segunda_derivada,
-            valor_inicial,
-            tolerancia,
-            maximo_iteraciones
-        )
-
-        if raiz is not None:
-            error = errores[-1] if errores else ""
-            valor_funcion = abs(funcion(raiz))
-
-            if error != "" and (error < tolerancia or valor_funcion < tolerancia):
-                estado = "Convergencia"
-            else:
-                estado = "No convergio"
-        else:
-            error = ""
-            valor_funcion = ""
-            estado = "No convergio"
-
-        escribir.writerow([
-            nombre, "Newton mejorado", iteraciones, raiz,
-            error, valor_funcion, estado
-        ])
+        for metodo_nombre, metodo, argumentos in metodos:
+            raiz, iteraciones, errores = metodo(*argumentos)
+            escribir.writerow([
+                nombre, metodo_nombre, iteraciones,
+                *preparar_resultado(funcion, raiz, errores)
+            ])
 
         print("Resultados guardados")
-
 
 print()
 print("Archivo generado: src/data/resumen_convergencia.csv")
