@@ -102,6 +102,8 @@ Esto demuestra que una funcion puede tener una raiz sin cambiar de signo y que N
 
 En la función con raíz doble se observó que un residuo pequeño no garantiza que la aproximación esté igual de cerca de la raíz exacta. Newton-Raphson obtuvo aproximadamente 1.99921875 después de 10 iteraciones. Aunque el valor absoluto de la función fue cercano a 6.10 × 10⁻⁷, la distancia a la raíz exacta x = 2 fue aproximadamente 7.81 × 10⁻⁴. Esto ocurre porque, para f(x) = (x − 2)², el residuo es el cuadrado de la distancia a la raíz. En cambio, Newton-Raphson mejorado alcanzó x = 2 en una iteración, con residuo cero.
 
+En el archivo resumen_convergencia.csv, la columna Error representa la diferencia absoluta entre aproximaciones consecutivas. Este valor no necesariamente coincide con el residuo de la función ni con la distancia a la raíz exacta. Por ejemplo, Newton mejorado obtuvo la raíz exacta x = 2 en una iteración, aunque el error registrado fue 0.8 porque el valor inicial era 1.2.
+
 ### 4.5. ¿Como influyen el intervalo inicial y la estimacion inicial?
 
 Se realizaron experimentos utilizando la funcion x³ - x - 2.
